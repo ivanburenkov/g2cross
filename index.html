@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1024">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <meta name="description" content="Fast online tool to calculate second-order correlation function g(2) for the time-tagged photon detection events.">
+    <meta name="author" content="Ivan Burenkov">
+    <title>g(2) calculator</title>
+
+    <style>html {
+      /* default font-size is 16px - this is set in the default browser stylesheet */ 
+      font-size: 16px; 
+      font-weight: 400; 
+      line-height: 1.5; 
+    }</style>
+
+    
+
+    <!-- Bootstrap core CSS -->
+<link href="bootstrapcss/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+    
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    
+<!--<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">-->
+  <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark shadow" style="padding-top:0; padding-bottom:0;">
+  <a class="navbar-brand col-md-4 col-lg-2 me-0 px-3" href="#">
+    <img src="bootstrapjs/favicon.ico" width="15%" height="15%" style="margin-right:5%; margin-left:-5%; margin-top:-12%;margin-bottom:-10%;">
+    G<sup>(2)</sup> calculator</a>
+  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" 
+  data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>    
+  </button>
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="https://ivanburenkov.github.io/"> <span class="fa-home" data-feather="home"></span></a>
+    </li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="fa-menu" data-feather="menu">
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item active" href="https://ivanburenkov.github.io/g2" title="g2 calculator">G<sup>(2)</sup> calculator</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/genjpd">JPD generator</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/genrpd">PND generator</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/fitjpd">JPD reconstruction</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/spdcalibrate" title="detector calibration">SPD calibration</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="collapse multi-collapse" id="help">
+    <div class="card card-body">
+      <img src="img/g2fig.png" width="400px"></img>
+      <h6>
+      This software can calculate second-order correlation function G<sup>(2)</sup>(t) using photon detection times from two single-photon detectors stored in a PicoQuant .PTU file (HydraHarp/MultiHarp/...). Work on other data formats (e.g. produced by Swabian instruments time taggers .ttbin) is in progress.
+      </h6>
+      <a id="killButton" class="btn btn-close" href="#help" data-toggle="collapse"></a>
+    </div>
+  </div>
+  <div class="collapse multi-collapse" id="refs">
+    <div class="card card-body">
+      <div class="container-fluid">
+        This web tool is using parts of C++ code written by S.V. Polyakov.
+        <!-- For details see our paper in <a class="link-secondary" href="https://journals.aps.org/pra/abstract/10.1103/PhysRevA.95.053806" target="_blank">PRA</a> or
+        <a class="link-secondary" href="https://arxiv.org/pdf/1704.05503" target="_blank">arXiv</a>.
+        For numerical algorithm details: <a class="link-secondary" href="https://doi.org/10.6028/jres.122.030" target="_blank">DOI</a>-->
+        <a id="killButton" class="btn btn-close" href="#refs" data-toggle="collapse"></a> 
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group ms-auto" role="group" style="margin-right:5px;">
+    <span id="collapsed">
+      <button type="button" 
+      class="btn btn-secondary showHelp" 
+      data-bs-toggle="button"
+      data-toggle="collapse" 
+      href="#help" 
+      role="button" aria-expanded="false" 
+      aria-controls="help" 
+      autocomplete="off"
+      >Help
+      </button>
+
+      <button type="button" 
+      class="btn btn-secondary showRefs" 
+      data-bs-toggle="button"
+      data-toggle="collapse" 
+      href="#refs" 
+      role="button" aria-expanded="false" 
+      aria-controls="refs" 
+      autocomplete="off"
+      >References</button>
+    </span>
+  </div>
+</header>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-4 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <span id="inputfileSpan">
+              <input  name="inputfile" type="file" 
+              id="inputfile" style="display: none;">
+              <label for="inputfile" type="button" 
+              class="btn btn-secondary" style="margin-left: 5px;">Load data file</label>
+          </span>
+          <span id="g2controls" style="display:none">
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span id="calcNote" style="display: none;">
+              If you see an empty graph after calculation is complete please click "Calculate" button again.
+            </span>
+            
+            <a class="link-secondary" href="#" aria-label="Add a new report">
+              
+            </a>
+          </h6>
+          <!--<li class="nav-item">
+            <a class="nav-link" href="#">
+              <span data-feather="clock"></span>
+              
+              <input id="tRes"
+                          class="form-control form-control-light w-5" 
+                          type="number" 
+                          style="width: 90%; display:inline;margin-right: 2%;"
+                          min=1
+                          max=1e9
+                          step=1
+                          value="10" 
+                          aria-label="Loss"
+                          class="form-inline"
+                          onchange="runCcodeG2();return false;">
+            </a>
+          </li>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Please enter time units conversion constant in nanoseconds</span>
+              <a class="link-secondary" href="#" title="For example if the time tagger return time intervals in clock cycles, then enter duration of the clock cycle in nanoseconds. Or if time is in seconds enter 1e9, etc.">
+                <span data-feather="help-circle"></span>
+              </a>
+          </h6>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span data-feather="clock"></span>
+              
+              <input id="sLoss"
+                          class="form-control form-control-light w-5" 
+                          type="number" 
+                          style="width: 90%; display:inline;margin-right: 2%;"
+                          min=1
+                          max=1e9
+                          step=1
+                          value="0.1" 
+                          aria-label="Loss"
+                          class="form-inline"
+                          onchange="runCcodeG2();return false;">
+            </a>
+          </li>
+        -->
+          <li>
+            <button id="calcButton"
+              type="button" 
+              class="btn btn-secondary showHelp" 
+              onclick="showonlyID('calcNote');runCcodeG2();return false;"
+              style="margin-left: 5px;"
+              >Calculate!
+            </button>
+          </li>
+            </span>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="col-md-8 ms-sm-auto col-lg-10 px-md-4" style="margin-top:48px;">
+      <div class="p-5 mb-4 bg-light rounded-3" id="fitIntro">
+        <div class="container-fluid py-5">
+          <h1 class="display-5 fw-bold" style="font-size:2rem;">Second-order correlation function G<sup>(2)</sup>(t)</h1>
+          <p class="col-md-8 fs-4" id="fileLoaded">
+            Please use sidebar to choose file in .ptu (Hydraharp/Multiharp) format.
+          </p>
+          <div class="progress">
+            <div class="progress-bar" id="pb" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <h6 class="display-5 fw-bold" style="font-size:1rem;">Known issues: For large files (>>1 MB), you may need to repeat the calculation to get data displayed in the graph. This code was tested with files up to 100 MB. Note that using larger files may result in excessive memory use and crush your browser.</h6>
+        </div>
+      </div>
+<button type="button" 
+              id="LogScale"
+              class="btn btn-secondary showHelp" 
+              onclick="islog=1;produceOutput('plotlyDiv',arraySize,myArrayg2,islog,isnorm,iserr);showonlyID('LinScale');hideonlyID('LogScale');return false;"
+              style="margin-left: 5px; display:none;"
+              >Log Scale
+            </button> 
+<button type="button" 
+              id="LinScale"
+              class="btn btn-secondary showHelp" 
+              onclick="islog=0;produceOutput('plotlyDiv',arraySize,myArrayg2,islog,isnorm,iserr);showonlyID('LogScale');hideonlyID('LinScale');return false;"
+              style="margin-left: 5px; display:none;"
+              >Linear Scale
+            </button> 
+<button type="button" 
+              id="NormG2"
+              class="btn btn-secondary showHelp" 
+              onclick="isnorm=1;produceOutput('plotlyDiv',arraySize,myArrayg2,islog,isnorm,iserr);showonlyID('RawG2');hideonlyID('NormG2');return false;"
+              style="margin-left: 5px; display:none;"
+              >Normalize
+            </button> 
+<button type="button" 
+              id="RawG2"
+              class="btn btn-secondary showHelp" 
+              onclick="isnorm=0;produceOutput('plotlyDiv',arraySize,myArrayg2,islog,isnorm,iserr);showonlyID('NormG2');hideonlyID('RawG2');return false;"
+              style="margin-left: 5px; display:none;"
+              >Show coincidences
+            </button> 
+<button type="button" 
+              id="HideErr"
+              class="btn btn-secondary showHelp" 
+              onclick="iserr=false;produceOutput('plotlyDiv',arraySize,myArrayg2,islog,isnorm,iserr);showonlyID('ShowErr');hideonlyID('HideErr');return false;"
+              style="margin-left: 5px; display:none;"
+              >Hide error bars
+            </button> 
+<button type="button" 
+              id="ShowErr"
+              class="btn btn-secondary showHelp" 
+              onclick="iserr=true;produceOutput('plotlyDiv',arraySize,myArrayg2,islog,isnorm,iserr);showonlyID('HideErr');hideonlyID('ShowErr');return false;"
+              style="margin-left: 5px; display:none;"
+              >Show error bars
+            </button>
+            
+<br>
+<div id='plotlyDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+
+<script src="https://unpkg.com/mathjs/lib/browser/math.js"></script>
+<script type="text/javascript" src="g2calc.js"> </script>
+
+<script type="text/javascript" src="main.js"> </script>
+<script type="text/javascript" src="sidebar.js"> </script>
+
+<div class="form-group purple-border" style="display: none;" id="tsvdata">
+  <label for="exampleFormControlTextarea5">
+    <button type="button" class="btn btn-secondary" onclick="CopyG2ToClipboard()">Copy G<sup>(2)</sup> data
+    </button>
+  </label>
+  <textarea class="form-control" id="datatsv" rows="3" readonly >
+  
+  </textarea>
+</div>
+
+
+ <a id="timing" class="btn btn-outline-secondary" href="#"></a>
+    </main>
+  </div>
+</div>
+
+
+    <script src="bootstrapjs/bootstrap.bundle.min.js"></script>
+
+      <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha" crossorigin="anonymous"></script>
+      <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+          $('#sidebarCollapse').on('click', function () {
+              $('#sidebar').toggleClass('active');
+          });
+      });
+    </script>
+        
+    <script>
+      feather.replace()
+    </script>
+  </body>
+</html>

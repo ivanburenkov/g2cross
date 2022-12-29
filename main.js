@@ -1,6 +1,6 @@
 /*   This file is part of photonic tools project
  *
- *   Copyright (C) 2021 Ivan Burenkov - All Rights Reserved
+ *   Copyright (C) 2023 Ivan Burenkov - All Rights Reserved
  *   You may use, distribute and modify this code under the
  *   terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   Please refer to ivanburenkov.github.io if using results obtained with this software in your publications.
+ *   Please refer to iburenkov.com if using results obtained with this software in your publications.
  */
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 

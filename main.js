@@ -234,7 +234,7 @@ function produceOutput(divName,sizeXY,dataCArray,islog,isnorm,iserr){
           xanchor: 'left',
           y: 0.1,
           yanchor: 'top',
-          text: 'ivanburenkov.github.io',
+          text: 'www.iburenkov.com',
           showarrow: false
         }]
     };
@@ -250,7 +250,7 @@ function produceOutput(divName,sizeXY,dataCArray,islog,isnorm,iserr){
         xanchor: 'left',
         y: 0.1,
         yanchor: 'top',
-        text: 'ivanburenkov.github.io',
+        text: 'www.iburenkov.com',
         showarrow: false
       }]
   };  
